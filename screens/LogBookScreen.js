@@ -92,10 +92,10 @@ export default function LogBook({ navigation, route }) {
           ]}
         >
           <Text style={[styles.sectionTitle, { textAlign: "left", color: colors.text }]}>{actionLabel}</Text>
-          <Text style={{ color: subTextColor, marginBottom: 4 }}>Resident: {residentName}</Text>
-          <Text style={{ color: subTextColor, marginBottom: 4 }}>Guard: {guardOnDuty}</Text>
-          <Text style={{ color: subTextColor, marginBottom: 4 }}>Location: {item.location || "-"}</Text>
-          <Text style={{ color: subTextColor, fontSize: 12 }}>Time: {timestamp}</Text>
+          <Text style={{ color: 'black', marginBottom: 4 }}>Resident: {residentName}</Text>
+          <Text style={{ color:  'black', marginBottom: 4 }}>Guard: {guardOnDuty}</Text>
+          <Text style={{ color:  'black', marginBottom: 4 }}>Location: {item.location || "-"}</Text>
+          <Text style={{ color:  'black', fontSize: 12 }}>Time: {timestamp}</Text>
         </View>
       )
     },

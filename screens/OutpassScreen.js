@@ -42,8 +42,6 @@ export default function OutpassScreen() {
   const loadOutpasses = async () => {
     try {
       const response = await outpass.getOutpasses()
-
-      // ✅ Handle "today" route returning a single object
       if (response.data.outpass) {
         setOutpasses([response.data.outpass]) // wrap in array
       } else if (Array.isArray(response.data)) {
@@ -94,7 +92,7 @@ export default function OutpassScreen() {
           ? "Create your first outpass request to get started"
           : `You don't have any ${activeFilter} outpasses`}
       </Text>
-      {activeFilter === "all" && (
+      { (
         <TouchableOpacity style={styles.createButton} onPress={handleCreateOutpass}>
           <Text style={styles.createButtonText}>Create Outpass</Text>
         </TouchableOpacity>

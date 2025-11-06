@@ -19,7 +19,6 @@ import { outpass } from "../services/api"
 import {useAuth} from "../context/AuthContext"
 import { COLORS, FONTS, SIZES, SPACING } from "../utils/constants"
 import LoadingSpinner from "../components/LoadingSpinner"
-
 import styles from "../styles/CreateOutpassStyles"
 
 export default function CreateOutpassScreen({ navigation }) {
@@ -190,7 +189,6 @@ export default function CreateOutpassScreen({ navigation }) {
               placeholderTextColor={colors.subText}
               value={formData.emergencyName}
               onChangeText={(value) => updateFormData("emergencyName", value)}
-              keyboardType="phone-pad"
             />
           </View>
 
