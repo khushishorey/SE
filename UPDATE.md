@@ -42,3 +42,14 @@
 - Your password will get  updated and next time when you try to login you have to enter the newly setted password.
 
 
+
+*** WARDEN SIDE ACTIVE ***
+
+1. The warden is now able to register without any fail.
+2. The warden dashboard fails to  load the page but it appears with 3 tabs- Dashboard, Approvals and Profile
+
+3. Profile page is not getting loaded still but.
+
+
+
+
