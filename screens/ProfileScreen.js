@@ -14,11 +14,17 @@ import { Picker } from "@react-native-picker/picker"
 export default function ProfileScreen() {
   const { isDarkMode, toggleTheme, colors } = useTheme();
   const { user, logout } = useAuth()
+  
+  const isStudent = user.role === "student"
+  const isWarden = user.role === "warden"
+
   const [profile, setProfile] = useState(null)
   const [editing, setEditing] = useState(false)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+
   // password update state
+
   const [currentPassword, setCurrentPassword] = useState("")
   const [newPassword, setNewPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
@@ -69,27 +75,35 @@ export default function ProfileScreen() {
     setProfile((prev) => ({ ...prev, [key]: value }))
   }
 
-  if (loading) {
-    return <LoadingSpinner />
-  }
+  if (loading) return <LoadingSpinner />
+  
   return (
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]}> 
+
+    {/* HEADER */}
+
       <View style={[styles.header, { backgroundColor: colors.card }]}> 
         <View style={{ flexDirection: 'row', justifyContent: 'flex-end', width: '100%' }}>
           <TouchableOpacity onPress={toggleTheme} style={{ padding: 8, alignSelf: 'flex-end' }}>
             <Ionicons name={isDarkMode ? 'sunny' : 'moon'} size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
+
+
         <View style={styles.avatarContainer}>
           <View style={[styles.avatar, { backgroundColor: colors.background + '20' }]}> 
-            <Text style={[styles.avatarText, { color: colors.text }]}>{profile?.name?.charAt(0)?.toUpperCase() || "U"}</Text>
+            <Text style={[styles.avatarText, { color: colors.text }]}>{profile?.name?.charAt(0)?.toUpperCase() || "YOU"}</Text>
           </View>
           <Text style={[styles.userName, { color: colors.text }]}>{profile?.name}</Text>
           <Text style={[styles.userRole, { color: colors.text, opacity: 0.8 }]}>{profile?.role?.toUpperCase()}</Text>
         </View>
       </View>
 
+
       <View style={styles.content}>
+
+        {/* PERSONAL INFO */}
+
         <View style={[styles.section, { backgroundColor: colors.card }]}> 
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Personal Information</Text>
@@ -128,7 +142,8 @@ export default function ProfileScreen() {
             <Text style={[styles.fieldValue, { color: colors.text }]}>{profile?.email}</Text>
             )}
           </View>
-
+          
+          {isStudent && (
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: colors.text }]}>Student ID</Text>
             {editing ? (
@@ -141,6 +156,7 @@ export default function ProfileScreen() {
             <Text style={[styles.fieldValue, { color: colors.text }]}>{profile?.studentId}</Text>
             )}
           </View>
+          )}
 
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: colors.text }]}>Phone Number</Text>
@@ -157,6 +173,8 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+
+        {isStudent && (
         <View style={[styles.section, { backgroundColor: colors.card }]}> 
           <View style={styles.sectionHeader}>
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Academic Information</Text>
@@ -217,12 +235,12 @@ export default function ProfileScreen() {
                   ))}
                 </Picker>
               </View>
+              
 
               </>
             )
           }
-              
-              
+               
 
           <View style={styles.fieldContainer}>
             <Text style={[styles.fieldLabel, { color: colors.text }]}>Room Number</Text>
@@ -237,8 +255,11 @@ export default function ProfileScreen() {
             )}
           </View>
         </View>
+        )}
 
-        
+        {/* CHANGE PASSWORD */}
+
+
         <View style={[styles.section, { backgroundColor: colors.card }]}> 
           <View style={styles.sectionHeader}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>Change Password</Text>
@@ -349,6 +370,10 @@ export default function ProfileScreen() {
           </View>
         </View>
 
+
+        {/* ACCOUNT STATUS */}
+
+
         <View style={[styles.section, { backgroundColor: colors.card }]}> 
           <Text style={[styles.sectionTitle, { color: colors.text }]}>Account Status</Text>
 
@@ -371,6 +396,8 @@ export default function ProfileScreen() {
             </View>
           </View>
         </View>
+
+        {/* LOGOUT */}
 
         <TouchableOpacity style={[styles.logoutButton, { backgroundColor: isDarkMode ? '#f4433620' : COLORS.error + '10' }]} onPress={logout}>
           <Ionicons name="log-out-outline" size={20} color={isDarkMode ? '#f44336' : COLORS.error} />

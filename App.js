@@ -5,6 +5,7 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ThemeProvider } from './context/ThemeContext'; // Make sure to import ThemeProvider
 import MainTabNavigator from './navigation/MainTabNavigator';
+import WardenTabNavigator from './navigation/WardenTabNavigator';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import LoadingScreen from './screens/LoadingScreen';
@@ -15,6 +16,12 @@ import LibraryScreen from './screens/LibraryScreen';
 import LogBook from './screens/LogBookScreen';
 import { StackScreen } from 'react-native-screens';
 import GuardDashboardScreen from './screens/GuardScreen';
+import WardenDashboardScreen from './screens/WardenDashboardScreen.';
+import OutpassScreen from './screens/OutpassScreen';
+// import EmergencyScreen from './screens/EmergencyScreen';
+import ProfileScreen from './screens/ProfileScreen';
+
+
 const Stack = createStackNavigator();
 
 function RootNavigator() {
@@ -23,6 +30,20 @@ function RootNavigator() {
   if (loading) {
     return <LoadingScreen />;
   }
+
+  // if user is not logged in
+  
+  if (!user) {
+    return (
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
+        <Stack.Screen name="Login" component={LoginScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen} />
+      </Stack.Navigator>
+    )
+  }
+    
+  // user is logged in so its safe to use user.role now otherwise error would have came
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {user ? (
@@ -34,8 +55,18 @@ function RootNavigator() {
           <Stack.Screen name="Scan" component={Scanner} />  
           <Stack.Screen name="Library" component={LibraryScreen} /> 
         </>
-        ):
-        (<>
+        ) : user.role == 'warden' ? (
+        <> 
+          <Stack.Screen name="WardenMain" component={WardenTabNavigator} />
+          {/* <Stack.Screen name="Outpass" component={OutpassScreen} /> */}
+          {/* <Stack.Screen name="Emergency" component={EmergencyScreen} /> */}
+          {/* <Stack.Screen name="Profile" component={ProfileScreen} /> */}
+          <Stack.Screen name="Scan" component={Scanner} />  
+
+          
+          </>
+        ) : (
+        <>
           <Stack.Screen name="GuardMain" component={GuardDashboardScreen} />
           <Stack.Screen name="SAC" component={SACScreen} />
           <Stack.Screen name="CreateOutpass" component={CreateOutpassScreen} />

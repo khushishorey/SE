@@ -71,9 +71,9 @@ export default function RegisterScreen({ navigation }) {
   }
 
   const validateForm = () => {
-    const { name, email, password, confirmPassword, studentId, department, year, hostel, phone, gender, deviceId } = formData
+    const { name, email, password, confirmPassword, studentId, wardenId, guardId, department, year, hostel, phone, gender, role, securityPost, roomNumber } = formData
 
-    if (!name || !email || !password || !studentId || !department || !year || !hostel || !phone || !gender) {
+    if (!name || !email || !password || !confirmPassword || !role || !phone || !gender) {
       Alert.alert("Error", "Please fill in all required fields")
       return false
     }
@@ -88,14 +88,33 @@ export default function RegisterScreen({ navigation }) {
       return false
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      Alert.alert("Error", "Please enter a valid email address")
-      return false
+      Alert.alert("Error", "Please enter a valid email address");
+      return false;
     }
 
-    return true
-  }
+    // role based check
+
+    if(role === 'student') {
+      if(!department || !studentId || !year || !hostel || !roomNumber) {
+        Alert.alert("Error", "Please fill in all the required fields for student");
+        return false;
+      }
+    } else if(role === 'warden') {
+      if(!hostel) {
+        Alert.alert("Error", "Please fill in all the required fields for warden");
+        return false;
+      }
+    } else if (role === 'security') {
+      if (!guardId || !securityPost) {
+        Alert.alert("Error", "Please fill in all required fields for a security guard.");
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   const handleRegister = async () => {
     if (!validateForm()) return

@@ -10,7 +10,6 @@ export default StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingHorizontal: SPACING.lg,
     paddingTop: 50,
     paddingBottom: SPACING.md,
     backgroundColor: COLORS.white,

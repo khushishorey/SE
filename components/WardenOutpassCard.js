@@ -5,7 +5,7 @@ import { Ionicons } from "@expo/vector-icons"
 import { commonAPI } from "../services/api"
 import { COLORS, FONTS, SIZES, SPACING, OUTPASS_STATUS } from "../utils/constants"
 
-export default function OutpassCard({ outpass, onUpdate }) {
+export default function WardenOutpassCard({ outpass, onUpdate }) {
   const getStatusColor = (status) => {
     switch (status) {
       case OUTPASS_STATUS.PENDING:
@@ -40,61 +40,69 @@ export default function OutpassCard({ outpass, onUpdate }) {
     }
   }
 
-  const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString("en-GB", {
+  const formatDate = (dateString) =>
+    new Date(dateString).toLocaleDateString("en-GB", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     })
-  }
 
-  const formatTime = (dateString) => {
-    return new Date(dateString).toLocaleTimeString("en-GB", {
+  const formatTime = (dateString) =>
+    new Date(dateString).toLocaleTimeString("en-GB", {
       hour: "2-digit",
       minute: "2-digit",
-      second: "2-digit",
     })
-  }
 
-  const handleCancel = () => {
-    Alert.alert("Cancel Outpass", "Are you sure you want to cancel this outpass request?", [
-      { text: "No", style: "cancel" },
-      {
-        text: "Yes, Cancel",
-        style: "destructive",
-        onPress: async () => {
-          try {
-            const response = await commonAPI.updateOutpass(outpass._id, { status: "cancelled" })
-            onUpdate(response.data)
-            Alert.alert("Success", "Outpass cancelled successfully")
-          } catch (error) {
-            Alert.alert("Error", "Failed to cancel outpass")
-          }
+  const updateStatus = (status) => {
+    Alert.alert(
+      "Confirm Action",
+      `Are you sure you want to ${status} this outpass?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Yes",
+          onPress: async () => {
+            try {
+              const response = await commonAPI.updateOutpass(outpass._id, {
+                status,
+              })
+              onUpdate(response.data)
+              Alert.alert("Success", `Outpass ${status} successfully`)
+            } catch (error) {
+              Alert.alert("Error", "Failed to update outpass")
+            }
+          },
         },
-      },
-    ])
+      ]
+    )
   }
 
-  const canCancel = outpass.status === OUTPASS_STATUS.PENDING || outpass.status === OUTPASS_STATUS.APPROVED
+  const canTakeAction = outpass.status === OUTPASS_STATUS.PENDING
 
   return (
     <View style={styles.card}>
+      {/* HEADER */}
       <View style={styles.cardHeader}>
         <View style={styles.statusContainer}>
-          <Ionicons name={getStatusIcon(outpass.status)} size={20} color={getStatusColor(outpass.status)} />
+          <Ionicons
+            name={getStatusIcon(outpass.status)}
+            size={20}
+            color={getStatusColor(outpass.status)}
+          />
           <Text style={[styles.statusText, { color: getStatusColor(outpass.status) }]}>
             {outpass.status.toUpperCase()}
           </Text>
         </View>
-        {canCancel && (
-          <TouchableOpacity style={styles.cancelButton} onPress={handleCancel}>
-            <Ionicons name="close" size={16} color={COLORS.error} />
-          </TouchableOpacity>
-        )}
       </View>
 
+      {/* CONTENT */}
       <View style={styles.cardContent}>
-        {/* ✅ backend sends "reason", so fallback to that if "purpose" missing */}
+        {/* Student Info (warden-specific) */}
+        <Text style={styles.studentName}>{outpass.student?.name}</Text>
+        <Text style={styles.studentMeta}>
+          ID: {outpass.student?.studentId} | Room: {outpass.student?.roomNumber}
+        </Text>
+
         <Text style={styles.purpose}>{outpass.purpose || outpass.reason}</Text>
         <Text style={styles.destination}>{outpass.destination}</Text>
 
@@ -118,18 +126,6 @@ export default function OutpassCard({ outpass, onUpdate }) {
           </View>
         </View>
 
-        {outpass.emergencyContact && (
-          <View style={styles.contactContainer}>
-            <Ionicons name="call-outline" size={16} color={COLORS.gray[600]} />
-            <Text style={styles.contactText}>
-              Emergency:{" "}
-              {typeof outpass.emergencyContact === "object"
-                ? `${outpass.emergencyContact.name} (${outpass.emergencyContact.phone})`
-                : outpass.emergencyContact}
-            </Text>
-          </View>
-        )}
-
         {outpass.remarks && (
           <View style={styles.remarksContainer}>
             <Text style={styles.remarksLabel}>Remarks:</Text>
@@ -138,13 +134,40 @@ export default function OutpassCard({ outpass, onUpdate }) {
         )}
       </View>
 
+      {/* ACTIONS */}
+      {canTakeAction && (
+        <View style={styles.actionRow}>
+          <TouchableOpacity
+            style={[styles.actionButton, styles.approve]}
+            onPress={() => updateStatus("approved")}
+          >
+            <Ionicons name="checkmark" size={18} color={COLORS.white} />
+            <Text style={styles.actionText}>Approve</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.actionButton, styles.reject]}
+            onPress={() => updateStatus("rejected")}
+          >
+            <Ionicons name="close" size={18} color={COLORS.white} />
+            <Text style={styles.actionText}>Reject</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+      
+
+      {/* FOOTER */}
       <View style={styles.cardFooter}>
-        <Text style={styles.createdAt}>Requested on {formatDate(outpass.createdAt)}</Text>
-        {outpass.approvedBy && <Text style={styles.approvedBy}>Approved by {outpass.approvedBy.name}</Text>}
+        <Text style={styles.createdAt}>
+          Requested on {formatDate(outpass.createdAt)}
+        </Text>
       </View>
     </View>
   )
 }
+
+
+
 
 const styles = StyleSheet.create({
   card: {
@@ -152,16 +175,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: SPACING.lg,
     marginBottom: SPACING.md,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
     elevation: 3,
   },
   cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: SPACING.md,
   },
   statusContainer: {
@@ -173,23 +189,26 @@ const styles = StyleSheet.create({
     fontFamily: FONTS.bold,
     marginLeft: SPACING.xs,
   },
-  cancelButton: {
-    backgroundColor: COLORS.error + "20",
-    padding: SPACING.xs,
-    borderRadius: 4,
-  },
   cardContent: {
     marginBottom: SPACING.md,
+  },
+  studentName: {
+    fontSize: SIZES.md,
+    fontFamily: FONTS.bold,
+    color: COLORS.gray[800],
+  },
+  studentMeta: {
+    fontSize: SIZES.sm,
+    color: COLORS.gray[600],
+    marginBottom: SPACING.sm,
   },
   purpose: {
     fontSize: SIZES.lg,
     fontFamily: FONTS.bold,
     color: COLORS.gray[800],
-    marginBottom: SPACING.xs,
   },
   destination: {
     fontSize: SIZES.md,
-    fontFamily: FONTS.regular,
     color: COLORS.gray[600],
     marginBottom: SPACING.md,
   },
@@ -203,27 +222,14 @@ const styles = StyleSheet.create({
   },
   timeLabel: {
     fontSize: SIZES.sm,
-    fontFamily: FONTS.regular,
-    color: COLORS.gray[600],
     marginLeft: SPACING.xs,
     marginRight: SPACING.xs,
     minWidth: 30,
+    color: COLORS.gray[600],
   },
   timeValue: {
     fontSize: SIZES.sm,
-    fontFamily: FONTS.regular,
     color: COLORS.gray[800],
-  },
-  contactContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: SPACING.md,
-  },
-  contactText: {
-    fontSize: SIZES.sm,
-    fontFamily: FONTS.regular,
-    color: COLORS.gray[700],
-    marginLeft: SPACING.xs,
   },
   remarksContainer: {
     backgroundColor: COLORS.gray[50],
@@ -233,13 +239,36 @@ const styles = StyleSheet.create({
   remarksLabel: {
     fontSize: SIZES.sm,
     fontFamily: FONTS.bold,
-    color: COLORS.gray[700],
-    marginBottom: SPACING.xs,
   },
   remarksText: {
     fontSize: SIZES.sm,
-    fontFamily: FONTS.regular,
     color: COLORS.gray[600],
+  },
+  actionRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: SPACING.sm,
+  },
+  actionButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    padding: SPACING.sm,
+    borderRadius: 8,
+    flex: 1,
+  },
+  approve: {
+    backgroundColor: COLORS.success,
+    marginRight: SPACING.xs,
+  },
+  reject: {
+    backgroundColor: COLORS.error,
+    marginLeft: SPACING.xs,
+  },
+  actionText: {
+    color: COLORS.white,
+    marginLeft: SPACING.xs,
+    fontFamily: FONTS.bold,
   },
   cardFooter: {
     borderTopWidth: 1,
@@ -248,15 +277,6 @@ const styles = StyleSheet.create({
   },
   createdAt: {
     fontSize: SIZES.xs,
-    fontFamily: FONTS.regular,
     color: COLORS.gray[500],
   },
-  approvedBy: {
-    fontSize: SIZES.xs,
-    fontFamily: FONTS.regular,
-    color: COLORS.success,
-    marginTop: SPACING.xs,
-  },
 })
-
-

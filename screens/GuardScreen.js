@@ -31,7 +31,7 @@ export default function GuardDashboardScreen({ navigation }) {
   }, [])
   
   // Ensure a default location is selected (use profile.location if available,
-  // otherwise fall back to the first entry in AllLocations)
+  // otherwise fall back to the first entry in All Locations)
   useEffect(() => {
     if (!loc) {
       if (profile?.location) {

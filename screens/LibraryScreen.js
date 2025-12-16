@@ -255,7 +255,7 @@ export default function LibraryScreen({ navigation }) {
               <Text style={{ color: colors.text, flex: 1 }}>
                 {book.name}
                 {book.isDue && (
-                  <Text style={{ color: "#f44336", fontFamily: FONTS.bold }}> (DUE)</Text>
+                  <Text style={{ color: "#761ec2ff", fontFamily: FONTS.bold }}> (DUE)</Text>
                 )}
               </Text>
               <Text style={{ color: colors.text, flex: 0.6, textAlign: "right" }}>

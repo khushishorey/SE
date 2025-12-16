@@ -31,7 +31,7 @@ router.post('/', async (req , res) => {
         }
         user.password = await bcrypt.hash(newPassword, 10);
 
-        await user.save();
+        
 
         let mailOptions = {
             from: process.env.GMAIL_ID,
@@ -43,10 +43,13 @@ router.post('/', async (req , res) => {
         transporter.sendMail(mailOptions, function(error, info){
             if (error) {
                 console.log(error);
+                return;
             } else {
                 console.log('Email sent: ' + info.response);
             }
         });
+
+        await user.save();
 
         return res.status(200).json({ message: 'Password reset email sent' });
     }   

@@ -1,6 +1,7 @@
 const express = require("express")
 const Outpass = require("../models/Outpass")
 const User = require("../models/User")
+const WardenUser = require("../models/WardenUser")
 const Log = require("../models/Log")
 const { authenticate } = require("../middleware/auth");
 const adminAuth = require("../middleware/adminAuth")
@@ -378,6 +379,52 @@ router.get("/history", [authenticate, checkOutpassExpiry], async (req, res) => {
     res.status(500).json({ message: "Server error fetching outpass history" })
   }
 })
+
+
+// Warden: Get outpass requests for students of warden's hostel
+router.get("/warden/requests", authenticate, async (req, res) => {
+  try {
+    // Ensure only wardens can access
+    if (req.user.role !== "warden") {
+      return res.status(403).json({ message: "Access denied" })
+    }
+
+    const wardenHostel = req.user.hostel
+
+    if (!wardenHostel) {
+      return res.status(400).json({ message: "Warden hostel not assigned" })
+    }
+
+    // Expire old outpasses before fetching
+    await expireOldOutpasses()
+
+    const outpasses = await Outpass.find({
+      status: { $in: ["pending", "approved", "rejected", "expired", "cancelled"] },
+    })
+      .populate({
+        path: "userId",
+        select: "name studentId hostel roomNumber",
+        match: { hostel: wardenHostel },
+      })
+      .sort({ createdAt: -1 })
+
+    // Remove outpasses whose users didn't match hostel
+    const filteredOutpasses = outpasses
+      .filter((op) => op.userId)
+      .map((op) => ({
+        ...op.toObject(),
+        student: op.userId, // 🔑 aligns with WardenOutpassCard
+      }))
+
+    res.json({
+      outpasses: filteredOutpasses,
+    })
+  } catch (error) {
+    console.error("Warden outpass fetch error:", error)
+    res.status(500).json({ message: "Server error fetching outpass requests" })
+  }
+})
+
 
 // Get current day's outpass for user
 router.get("/today", [authenticate, checkOutpassExpiry], async (req, res) => {

@@ -7,11 +7,12 @@ const GuardUser = require("../models/GuardUser")
 const { authenticate } = require("../middleware/auth");
 const router = express.Router()
 
+
 // Register new user
 router.post("/register", async (req, res) => {
   try {
     console.log("INCOMING REGISTRATION DATA:", req.body);
-    const { name, email, password, studentId, guardId, wardenId, hostel, roomNumber, phoneNumber, securityPost, emergencyContact, gender, year, department, role} = req.body
+    const { name, email, password, studentId, guardId, wardenId, hostel, roomNumber, phoneNumber, securityPost, gender, year, department, role, deviceId} = req.body
     let user;
     const hashPassword = await bcrypt.hash(password, 10)
 
@@ -37,7 +38,6 @@ router.post("/register", async (req, res) => {
       hostel,
       roomNumber,
       phoneNumber,
-      emergencyContact,
       gender,
       year,
       department,
@@ -48,7 +48,7 @@ router.post("/register", async (req, res) => {
     else if(role == "warden") {
        // Check if user already exists
     const existingUser = await WardenUser.findOne({
-      $or: [{ email }, { Id }],
+      $or: [{ email }],
     })
 
     if (existingUser) {
@@ -63,20 +63,20 @@ router.post("/register", async (req, res) => {
       password: hashPassword,
       hostel,
       phoneNumber,
-      
       gender,
+      deviceId,
     })
     }
     else {
        // Create new user
-        // Check if user already exists
+       // Check if user already exists
     const existingUser = await GuardUser.findOne({
-      $or: [{ email }],
+      $or: [{ email }, { guardId }],
     })
 
     if (existingUser) {
       return res.status(400).json({
-        message: "Guard with this ID already exists",
+        message: "Guard with this email or ID already exists",
       })
     }
 
@@ -87,9 +87,8 @@ router.post("/register", async (req, res) => {
       location : securityPost,
       guardId: guardId,
       phoneNumber,
-      emergencyContact,
-      
       gender,
+      deviceId,
       
     })
     }
@@ -186,7 +185,7 @@ router.post("/login", async (req, res) => {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);1      
+    console.error("Login error:", error);      
     res.status(500).json({ message: "Server error during login" });
   }
 })

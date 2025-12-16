@@ -112,7 +112,9 @@ export default function OutpassScreen() {
     setOutpasses((prev) => prev.map((op) => (op._id === updatedOutpass._id ? updatedOutpass : op)))
   }
 
-  const renderOutpassCard = ({ item }) => <OutpassCard outpass={item} onUpdate={handleOutpassUpdate} />
+  const renderOutpassCard = ({ item }) => (
+    <OutpassCard outpass={item} onUpdate={handleOutpassUpdate} />
+  ) 
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
